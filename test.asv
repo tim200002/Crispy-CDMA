@@ -1,0 +1,12 @@
+codeLength =2;
+cdmaEncoder = CDMAEncoder(codeLength);
+cdmaEncoder.getWalshMatrix;
+testSignal1 = Signal([1,0,1,1],10);
+cdmaSignal1 = cdmaEncoder.step(testSignal1,2)
+
+testSignal2 = Signal([0,0,1,1],10);
+cdmaSignal2 = cdmaEncoder.step(testSignal2,1);
+
+addedSignal =testSignal1+testSignal2
+
+pamMapper = PAMMapper(codeLength)

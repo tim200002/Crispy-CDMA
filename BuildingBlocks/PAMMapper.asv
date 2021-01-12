@@ -1,0 +1,17 @@
+classdef PAMMapper
+    properties
+        codeLength %length of the code is minimum and maximum
+    end
+    methods
+        function obj = PAMMapper(codeLength)
+            obj.codeLength=codeLength
+        end
+        function symbolVector = createSymbolVector(obj)
+            symbolVector=[]
+            delta = (2*obj.codeLength+1)/2;
+            for i=0:2.2obj.codeLength
+                symbolVector=[symbolVector -1+i*delta]
+        end
+    end
+    
+end

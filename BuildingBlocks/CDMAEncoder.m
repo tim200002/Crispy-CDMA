@@ -10,7 +10,7 @@ classdef CDMAEncoder
          end
          
          function retSignal = step(obj, signalToBeEncoded, walshIndex)
-             walshSequence = obj.walshMatrix(:,walshIndex); %This is the Code for the current index
+             walshSequence = obj.walshMatrix(:,walshIndex); %This is the Code for the current index (row)
              bipolarSignal = obj.makeBipolar(signalToBeEncoded);
              
              encodedData = [];
@@ -21,13 +21,12 @@ classdef CDMAEncoder
              
              retSignal = Signal(encodedData, bipolarSignal.fs*obj.codeLength);
              retSignal.signaltype = Signaltype.Valuecontinuous;
-             
-             
+                          
          end
          
          function retSig = makeBipolar(obj, signal)
-             signal.data = 2*signal.data-1;
-             retSig = signal;
+             retSig =Signal( 2*signal.data-1,signal.fs);
+             retSig.signaltype = Signaltype.Valuecontinuous;
          end
          
          function matrix = getWalshMatrix(obj)

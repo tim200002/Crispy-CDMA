@@ -1,21 +1,21 @@
-clear
+clear all
+codeLength =4;
 
-codeLength =2;
+serializer = ImageSerializer('TestImages\tvTestScreen32x32.jpg');
+bitStream=serializer.GenerateRGBBitStream();
 cdmaEncoder = CDMAEncoder(codeLength);
 signal_length = 1000;
-testSignal1 = Signal( round(0.75*rand(1,signal_length)),1e3); %Wie muss die Abtastfrequenz gesetzt werden
-disp('Original')
-testSignal1.data(1:10)
-
-cdmaSignal1 = cdmaEncoder.step(testSignal1,2);
+bitSignal1=Signal(double(bitStream(1,:)),1e3);
+bitSignal2=Signal(double(bitStream(2,:)),1e3);
+bitSignal3=Signal(double(bitStream(3,:)),1e3);
 
 
-testSignal2 = Signal( round(0.75*rand(1,signal_length)),1e3);
-cdmaSignal2 = cdmaEncoder.step(testSignal2,1);
+cdmaSignal1 = cdmaEncoder.step(bitSignal1,1);
+cdmaSignal2 = cdmaEncoder.step(bitSignal2,2);
+cdmaSignal3 = cdmaEncoder.step(bitSignal3,3);
 
 
-
-addedSignal =cdmaSignal1+cdmaSignal2;
+addedSignal =cdmaSignal1+cdmaSignal2+cdmaSignal3;
 
 pamMapper = PAMMapper(codeLength);
 afterMapper = pamMapper.step(addedSignal);
@@ -55,10 +55,10 @@ afterDemodulation = mixer.step(removedPilot);
 load('untitled.mat');
 filter = Filter(32e3, Num);
 afterFilt = filter.step(afterDemodulation);
-figure(1)
-plot(afterFilt.data(1:1000)*2)
-figure(2)
-plot(afterPulseShaper.data(1:1000))
+% figure(1)
+% plot(afterFilt.data(1:1000)*2)
+% figure(2)
+% plot(afterPulseShaper.data(1:1000))
 
 %Read Bits
 bitIndex = [1: 16: afterFilt.length];
@@ -80,6 +80,13 @@ pamDemapper = PAMDemapper(codeLength);
 demappedSignal = pamDemapper.step(unformed);
 
 cdmaDecoder = CDMADecoder(codeLength);
-resSignal = cdmaDecoder.step(demappedSignal,2);
-disp('Result')
-resSignal.data(1:10)
+res1 = cdmaDecoder.step(demappedSignal,1);
+res2 = cdmaDecoder.step(demappedSignal,2);
+res3 = cdmaDecoder.step(demappedSignal,3);
+
+bistream(1,:)=res1.data';
+bistream(2,:)=res2.data';
+bistream(3,:)=res3.data';
+
+deserializer = ImageDeserializer();
+img=deserializer.GetImageFromBitVector(bitStream);

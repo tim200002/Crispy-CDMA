@@ -1,5 +1,7 @@
 clear all
 codeLength =4;
+ fc = 13e3;
+ samplesPerSymbol=16;
 
 serializer = ImageSerializer('TestImages\tvTestScreen32x32.jpg');
 bitStream=serializer.GenerateRGBBitStream();
@@ -20,64 +22,19 @@ addedSignal =cdmaSignal1+cdmaSignal2+cdmaSignal3;
 pamMapper = PAMMapper(codeLength);
 afterMapper = pamMapper.step(addedSignal);
 
-%Pulse shaped
-pulseShaper = Pulseshaper(Impulsetype.RaisedCosine, 16);
-afterPulseShaper = pulseShaper.step(afterMapper);
+
+modulator = Modulator(fc,samplesPerSymbol);
+modulatedSignal = modulator.step(afterMapper);
 
 
 
-
-%Modulate Signal
-scope = Scope();
-fc = 13e3;
-mixer = Mixer(Mixertype.Cosine, fc);
-afterMixer = mixer.step(afterPulseShaper);
-
-%Insert Pilot
-pilotInserter = PilotInserter(fc);
-pilotedSignal = pilotInserter.step(afterMixer);
-
-
-
-
-
-%Search for pilot
-synchronizer = Synchronizer(fc);
-pilotIndex = synchronizer.step(pilotedSignal);
-
-
-
-removedPilot = Signal(pilotedSignal.data(pilotIndex:end), pilotedSignal.fs);
-
-%Demodulate Signal
-afterDemodulation = mixer.step(removedPilot);
-%Filter Signal
-load('untitled.mat');
-filter = Filter(32e3, Num);
-afterFilt = filter.step(afterDemodulation);
-% figure(1)
-% plot(afterFilt.data(1:1000)*2)
-% figure(2)
-% plot(afterPulseShaper.data(1:1000))
-
-%Read Bits
-bitIndex = [1: 16: afterFilt.length];
-unformed = Signal(afterFilt.data(bitIndex)*2, afterDemodulation.fs/16);
-
-
-
-
-
-
-% figure(2)
-% plot(afterDemodulation.data(1:1000));
-
-
+demodulator = Demodulator(fc, samplesPerSymbol);
+demodulatedSignal = demodulator.step(modulatedSignal);
 
 
 
 pamDemapper = PAMDemapper(codeLength);
-demappedSignal = pamDemapper.step(unformed);
+demappedSignal = pamDemapper.step(demodulatedSignal);
 
 cdmaDecoder = CDMADecoder(codeLength);
 res1 = cdmaDecoder.step(demappedSignal,1);

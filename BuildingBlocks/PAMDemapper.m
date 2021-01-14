@@ -4,7 +4,7 @@ classdef PAMDemapper
     end
     methods
         function obj = PAMDemapper(codeLength)
-            obj.codeLength=codeLength
+            obj.codeLength=codeLength;
         end
         
         function retSignal = step(obj, signal)

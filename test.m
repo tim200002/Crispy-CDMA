@@ -1,8 +1,13 @@
 clear all
 codeLength =4;
 headerLength = 16;
- fc = 13e3;
- samplesPerSymbol=16;
+fc = 14e3;
+samplesPerSymbol=15;
+symbolRate = 0.8e3;
+
+amplitudeScope = Scope(ScopeYAxis.Magnitude);
+dbScope = Scope(ScopeYAxis.dB);
+scope = Scope();
 
  
  %% Serialize Image
@@ -10,12 +15,12 @@ serializer = ImageSerializer('TestImages\tvTestScreen32x32.jpg');
 bitStream=serializer.GenerateRGBBitStream();
 cdmaEncoder = CDMAEncoder(codeLength);
 signal_length = 1000;
-bitSignal1=Signal(double(bitStream(1,:)),1e3);
-bitSignal2=Signal(double(bitStream(2,:)),1e3);
-bitSignal3=Signal(double(bitStream(3,:)),1e3);
+bitSignal1=Signal(double(bitStream(1,:)),symbolRate);
+bitSignal2=Signal(double(bitStream(2,:)),symbolRate);
+bitSignal3=Signal(double(bitStream(3,:)),symbolRate);
 
 %% CDMA Encode Signal
-cdmaSignal1 = cdmaEncoder.step(bitSignal1,1);
+cdmaSignal1 = cdmaEncoder.step(bitSignal1,1)
 cdmaSignal2 = cdmaEncoder.step(bitSignal2,2);
 cdmaSignal3 = cdmaEncoder.step(bitSignal3,3);
 
@@ -39,6 +44,7 @@ headerSignal = header.addHeader(afterMapper);
  mixedSignal = mixer.step(pulseShapedSignal);
  pilotedSignal = pilotInserter.step(mixedSignal);
  modulatedSignal = pilotedSignal;
+ amplitudeScope.plotFrequencyDomain(modulatedSignal);
 
 
 
@@ -96,4 +102,5 @@ resStream(2,:)=res2.data';
 resStream(3,:)=res3.data';
 
 deserializer = ImageDeserializer();
+figure(2)
 img=deserializer.GetImageFromBitVector(resStream);

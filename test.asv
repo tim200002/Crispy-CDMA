@@ -1,6 +1,10 @@
 clear all
 codeLength =4;
+ fc = 13e3;
+ samplesPerSymbol=16;
 
+ 
+ %% Serialize Image
 serializer = ImageSerializer('TestImages\tvTestScreen32x32.jpg');
 bitStream=serializer.GenerateRGBBitStream();
 cdmaEncoder = CDMAEncoder(codeLength);
@@ -9,7 +13,7 @@ bitSignal1=Signal(double(bitStream(1,:)),1e3);
 bitSignal2=Signal(double(bitStream(2,:)),1e3);
 bitSignal3=Signal(double(bitStream(3,:)),1e3);
 
-
+%% CDMA Encode Signal
 cdmaSignal1 = cdmaEncoder.step(bitSignal1,1);
 cdmaSignal2 = cdmaEncoder.step(bitSignal2,2);
 cdmaSignal3 = cdmaEncoder.step(bitSignal3,3);
@@ -20,74 +24,57 @@ addedSignal =cdmaSignal1+cdmaSignal2+cdmaSignal3;
 pamMapper = PAMMapper(codeLength);
 afterMapper = pamMapper.step(addedSignal);
 
-% %Pulse shaped
-% pulseShaper = Pulseshaper(Impulsetype.RaisedCosine, 16);
-% afterPulseShaper = pulseShaper.step(afterMapper);
-% 
-% 
-% 
-% 
-% %Modulate Signal
-% scope = Scope();
-% fc = 13e3;
-% mixer = Mixer(Mixertype.Cosine, fc);
-% afterMixer = mixer.step(afterPulseShaper);
-% 
-% %Insert Pilot
-% pilotInserter = PilotInserter(fc);
-% pilotedSignal = pilotInserter.step(afterMixer);
-
-modulator = Modulator(13e3,16)
-pilotedSignal = modulator.step(afterMapper)
+%% Modulation
+ pilotInserter = PilotInserter(fc);
+ mixer = Mixer(Mixertype.Cosine, fc);
+ pulseShaper = Pulseshaper(Impulsetype.RaisedCosine, 16);
+ 
+ pulseShapedSignal = pulseShaper.step(afterMapper);
+ mixedSignal = mixer.step(pulseShapedSignal);
+ pilotedSignal = pilotInserter.step(mixedSignal);
+ modulatedSignal = pilotedSignal;
 
 
 
-%Search for pilot
-synchronizer = Synchronizer(fc);
-pilotIndex = synchronizer.step(pilotedSignal);
+%% Channel
+channel = Channel('awgn', 10);
+
+afterChannel = channel.step(modulatedSignal);
 
 
+%% Demdoulation
+signalToBeDemodulated = afterChannel;
+mixer = Mixer(Mixertype.Cosine, fc);
+synchronizer = Synchronizer(obj.fc);
 
-removedPilot = Signal(pilotedSignal.data(pilotIndex:end), pilotedSignal.fs);
-
-%Demodulate Signal
-afterDemodulation = mixer.step(removedPilot);
-%Filter Signal
-load('untitled.mat');
+load('filter.mat');
 filter = Filter(32e3, Num);
-afterFilt = filter.step(afterDemodulation);
-% figure(1)
-% plot(afterFilt.data(1:1000)*2)
-% figure(2)
-% plot(afterPulseShaper.data(1:1000))
 
-%Read Bits
-bitIndex = [1: 16: afterFilt.length];
-unformed = Signal(afterFilt.data(bitIndex)*2, afterDemodulation.fs/16);
+%Remove Pilot
+pilotIndex = synchronizer.step(signalToBeDemodulated);
+removedPilot = Signal(signalToBeDemodulated.data(pilotIndex:end), signalToBeDemodulated.fs);
+
+%Mix Down
 
 
+ 
 
 
-
-
-% figure(2)
-% plot(afterDemodulation.data(1:1000));
-
-
-
-
-
+%% CDMA Decode Signal
 pamDemapper = PAMDemapper(codeLength);
-demappedSignal = pamDemapper.step(unformed);
+demappedSignal = pamDemapper.step(demodulatedSignal);
 
 cdmaDecoder = CDMADecoder(codeLength);
+
+
+%% Convert Back to Image
 res1 = cdmaDecoder.step(demappedSignal,1);
 res2 = cdmaDecoder.step(demappedSignal,2);
 res3 = cdmaDecoder.step(demappedSignal,3);
 
-bistream(1,:)=res1.data';
-bistream(2,:)=res2.data';
-bistream(3,:)=res3.data';
+resStream(1,:)=res1.data';
+resStream(2,:)=res2.data';
+resStream(3,:)=res3.data';
 
 deserializer = ImageDeserializer();
-img=deserializer.GetImageFromBitVector(bitStream);
+img=deserializer.GetImageFromBitVector(resStream);

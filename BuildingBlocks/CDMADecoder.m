@@ -33,7 +33,7 @@ classdef CDMADecoder
              skalar = dot(signalArray, walshSequence);
              if skalar>0
                  bitStream = [inputStream, 1];
-             elseif skalar<0
+             elseif skalar<=0  %ToDo change should get zero
                  bitStream = [inputStream, 0];
              else 
                  bitStream=inputStream;

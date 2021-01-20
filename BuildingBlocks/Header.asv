@@ -25,15 +25,8 @@ classdef Header
         end
         
         function [retSignal, retLength] = removeHeaderAndGetLength(obj, signal)
-           %Create Scale Factor from ones at front
-            ones = signal.data(1: 4);
-            scaleFaktor = 1/mean(ones);
-            header =scaleFaktor* signal.data(5:obj.lengthInBits + 4); %4 because 4 ones added in front
-            
-                        
-            retSignal = Signal(signal.data(obj.lengthInBits+4+1:end)*scaleFaktor, signal.fs);
-            
-
+            header = signal.data(1:obj.lengthInBits + 4); %4 because
+            retSignal = Signal(signal.data(obj.lengthInBits+1:end), signal.fs);
             
             headerToBits = [];
             for i=1:length(header)

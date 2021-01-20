@@ -43,7 +43,7 @@ headerSignal = header.addHeader(afterMapper);
  pulseShapedSignal = pulseShaper.step(headerSignal);
  mixedSignal = mixer.step(pulseShapedSignal);
  pilotedSignal = pilotInserter.step(mixedSignal);
- modulatedSignal = pilotedSignal;
+ modulatedSignal = Signal(pilotedSignal.data/4,pilotedSignal.fs);
  amplitudeScope.plotFrequencyDomain(modulatedSignal);
 
 
@@ -78,11 +78,12 @@ filteredSignal = filter.step(demixedSignal);
 symbolIndex = [1: samplesPerSymbol: filteredSignal.length];
 timediscreteSignal = Signal(filteredSignal.data(symbolIndex)*2, filteredSignal.fs/16);
  
-demodulatedSignal = timediscreteSignal;
+demodulatedSignal = timediscreteSignal
 
 %Remove HEader
 header = Header(headerLength);
 [signalWithoutHeader, length] = header.removeHeaderAndGetLength(demodulatedSignal);
+length
 
 
 %% CDMA Decode Signal

@@ -24,12 +24,22 @@ classdef Header
             bitVector = 2*bitVector-1;
            
 
+            %Header Always starts with 4 ones in a row
+            one = [1;1;1;1];
+            bitVector = [one; bitVector];
             retSignal =Signal([bitVector; signal.data], signal.fs);   
         end
         
         function [retSignal, retLength] = removeHeaderAndGetLength(obj, signal)
-            header = signal.data(1:obj.lengthInBits);
-            retSignal = Signal(signal.data(obj.lengthInBits+1:end), signal.fs);
+           %Create Scale Factor from ones at front
+            ones = signal.data(1: 4);
+            scaleFaktor = 1/mean(ones);
+            header =scaleFaktor* signal.data(5:obj.lengthInBits + 4); %4 because 4 ones added in front
+            
+                        
+            retSignal = Signal(signal.data(obj.lengthInBits+4+1:end)*scaleFaktor, signal.fs);
+            
+
             
             headerToBits = [];
             for i=1:length(header)

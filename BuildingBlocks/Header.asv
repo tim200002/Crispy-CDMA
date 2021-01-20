@@ -18,13 +18,15 @@ classdef Header
             end
             %Map Bits from 0,1 to -1,1
             bitVector = 2*bitVector-1;
-           
 
+            %Header Always starts with 4 ones in a row
+            one = [1;1;1;1];
+            bitVector = [one; bitVector];
             retSignal =Signal([bitVector; signal.data], signal.fs);   
         end
         
         function [retSignal, retLength] = removeHeaderAndGetLength(obj, signal)
-            header = signal.data(1:obj.lengthInBits);
+            header = signal.data(1:obj.lengthInBits + 4); %4 because
             retSignal = Signal(signal.data(obj.lengthInBits+1:end), signal.fs);
             
             headerToBits = [];

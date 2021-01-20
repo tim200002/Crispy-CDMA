@@ -1,5 +1,6 @@
 clear all
 codeLength =4;
+headerLength = 16;
  fc = 13e3;
  samplesPerSymbol=16;
 
@@ -24,12 +25,17 @@ addedSignal =cdmaSignal1+cdmaSignal2+cdmaSignal3;
 pamMapper = PAMMapper(codeLength);
 afterMapper = pamMapper.step(addedSignal);
 
+%% Add Header
+header = Header(headerLength);
+
+headerSignal = header.addHeader(afterMapper);
+
 %% Modulation
  pilotInserter = PilotInserter(fc);
  mixer = Mixer(Mixertype.Cosine, fc);
  pulseShaper = Pulseshaper(Impulsetype.RaisedCosine, samplesPerSymbol);
  
- pulseShapedSignal = pulseShaper.step(afterMapper);
+ pulseShapedSignal = pulseShaper.step(headerSignal);
  mixedSignal = mixer.step(pulseShapedSignal);
  pilotedSignal = pilotInserter.step(mixedSignal);
  modulatedSignal = pilotedSignal;
@@ -68,20 +74,22 @@ timediscreteSignal = Signal(filteredSignal.data(symbolIndex)*2, filteredSignal.f
  
 demodulatedSignal = timediscreteSignal;
 
- 
+%Remove HEader
+header = Header(headerLength);
+[signalWithoutHeader, length] = header.removeHeaderAndGetLength(demodulatedSignal);
 
 
 %% CDMA Decode Signal
 pamDemapper = PAMDemapper(codeLength);
-demappedSignal = pamDemapper.step(demodulatedSignal);
+demappedSignal = pamDemapper.step(signalWithoutHeader);
 
 cdmaDecoder = CDMADecoder(codeLength);
 
 
 %% Convert Back to Image
-res1 = cdmaDecoder.step(demappedSignal,1)
-res2 = cdmaDecoder.step(demappedSignal,2)
-res3 = cdmaDecoder.step(demappedSignal,3)
+res1 = cdmaDecoder.step(demappedSignal,1);
+res2 = cdmaDecoder.step(demappedSignal,2);
+res3 = cdmaDecoder.step(demappedSignal,3);
 
 resStream(1,:)=res1.data';
 resStream(2,:)=res2.data';

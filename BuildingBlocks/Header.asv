@@ -10,12 +10,8 @@ classdef Header
         
         function retSignal = addHeader(obj, signal)
             signalLength = signal.length;
-            
-            bitVector = de2bi(signalLength);
-            
-            a = obj.lengthInBits - length(bitVector);
-            
-            bitVector = [bitVector zeros(1,a)].';
+            a = 16 - length()
+            bitVector = de2bi(signalLength).';
             
             if length(bitVector) > obj.lengthInBits
                 error('lengthInBits is to short for signal Length');

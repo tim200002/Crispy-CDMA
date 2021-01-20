@@ -1,5 +1,5 @@
 %%___________________________ PARAMETERS __________________________________
-path = "c:\users\ephraim fuchs\desktop\";
+path = "C:\Users\maxim\Documents";
 inputImg = "inputImg40.JPG";
 outputImg = "outputImg.JPG";
 nsymbols = 16;

@@ -9,15 +9,20 @@ amplitudeScope = Scope(ScopeYAxis.Magnitude);
 dbScope = Scope(ScopeYAxis.dB);
 scope = Scope();
 
+done = false;
  
  %% Serialize Image
-serializer = ImageSerializer('TestImages\tvTestScreen32x32.jpg');
-bitStream=serializer.GenerateRGBBitStream();
+serializer = AdvancedImageSerializer('TestImages\tvTestScreen.jpg', 4);
+deserializer = AdvancedImageDeserializer(4,true);
+
+while done == false
+
+[signal, done]=serializer.getNextSignal()
 cdmaEncoder = CDMAEncoder(codeLength);
 signal_length = 1000;
-bitSignal1=Signal(double(bitStream(1,:)),symbolRate);
-bitSignal2=Signal(double(bitStream(2,:)),symbolRate);
-bitSignal3=Signal(double(bitStream(3,:)),symbolRate);
+bitSignal1=Signal(double(signal(1,:)),symbolRate);
+bitSignal2=Signal(double(signal(2,:)),symbolRate);
+bitSignal3=Signal(double(signal(3,:)),symbolRate);
 
 %% CDMA Encode Signal
 cdmaSignal1 = cdmaEncoder.step(bitSignal1,1)
@@ -44,7 +49,7 @@ headerSignal = header.addHeader(afterMapper);
  mixedSignal = mixer.step(pulseShapedSignal);
  pilotedSignal = pilotInserter.step(mixedSignal);
  modulatedSignal = pilotedSignal;
- amplitudeScope.plotFrequencyDomain(modulatedSignal);
+ %amplitudeScope.plotFrequencyDomain(modulatedSignal);
 
 
 
@@ -101,6 +106,6 @@ resStream(1,:)=res1.data';
 resStream(2,:)=res2.data';
 resStream(3,:)=res3.data';
 
-deserializer = ImageDeserializer();
-figure(2)
-img=deserializer.GetImageFromBitVector(resStream);
+deserializer.AddIncomingSignal(resStream);
+
+end

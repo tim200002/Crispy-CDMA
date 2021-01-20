@@ -1,0 +1,1 @@
+clear alldone = false;serializer = AdvancedImageSerializer('TestImages\tvTestScreen32x32.jpg',4);deserializer= AdvancedImageDeserializer(4,true);while done == false    [signal,done] = serializer.getNextSignal();    deserializer.AddIncomingSignal(signal);end

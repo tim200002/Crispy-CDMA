@@ -42,8 +42,6 @@ headerSignal = header.addHeader(afterMapper)
  
  pulseShapedSignal = pulseShaper.step(headerSignal);
  mixedSignal = mixer.step(pulseShapedSignal);
- figure(4)
- plot(mixedSignal.data)
  pilotedSignal = pilotInserter.step(mixedSignal);
  modulatedSignal = Signal(pilotedSignal.data, pilotedSignal.fs)
 

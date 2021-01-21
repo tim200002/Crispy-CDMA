@@ -17,8 +17,6 @@ magnitudeScope = Scope(ScopeYAxis.Magnitude);
 
 %% Demdoulation
 signalToBeDemodulated = Signal(receivedSignal.data*2, receivedSignal.fs);
-figure(1)
-plot(signalToBeDemodulated.data);
 
 mixer = Mixer(Mixertype.Cosine, fc);
 synchronizer = Synchronizer(fc);
@@ -28,8 +26,7 @@ synchronizer = Synchronizer(fc);
 %Remove Pilot
 [pilotIndex, significant] = synchronizer.step(signalToBeDemodulated)
 removedPilot = Signal(signalToBeDemodulated.data(pilotIndex:end), signalToBeDemodulated.fs);
-figure(2);
-plot(removedPilot.data)
+
 
 %Mix Down
 demixedSignal = mixer.step(removedPilot);
@@ -51,12 +48,9 @@ demodulatedSignal = timediscreteSignal;
 %Remove HEader
 header = Header(headerLength);
 [signalWithoutHeader, length] = header.removeHeaderAndGetLength(demodulatedSignal);
-length
-signalWithoutHeader
 
 shortendSignal = Signal(signalWithoutHeader.data(1:length), signalWithoutHeader.fs)
-figure(3)
-plot(signalWithoutHeader.data)
+
 
 
 %% CDMA Decode Signal
@@ -76,5 +70,5 @@ resStream(2,:)=res2.data';
 resStream(3,:)=res3.data';
 
 deserializer = ImageDeserializer();
-img=deserializer.GetImageFromBitVector(resStream);
+img=deserializer.GetImageFromBitVector(resStream,32,32);
 

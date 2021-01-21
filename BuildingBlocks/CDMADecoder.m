@@ -11,17 +11,29 @@ classdef CDMADecoder
          
          function retSignal = step(obj, signalToBeDecoded, walshIndex)
              walshSequence = obj.walshMatrix(:,walshIndex); %This is the Code for the current index
-             
              signalValues = signalToBeDecoded.data;
-            
-              bitStream = [];
+             
+             %fast Implementation
+             trueSignalLength = length(signalValues)/length(walshSequence');
+             testStream = ones(1, trueSignalLength);
+             testStream = kron(testStream,walshSequence');
+             ds = testStream.*signalValues';
+             rds=reshape(ds,obj.codeLength,trueSignalLength);
+             rds = sum(rds);
+             rds(rds<=0) = 0;
+             rds(rds>0) = 1;
+             
+             %Slow Implementation
+             %bitStream = [];
              %Every interation codeLength number of values gets extracted from signal Values and decoded in bitStream 
-             while ~isempty(signalValues)
-                 currentSequence = signalValues(1:obj.codeLength);
-                 bitStream = obj.addBitToBitStream(bitStream, currentSequence,walshSequence);
-                 signalValues = signalValues(obj.codeLength+1:end);
-             end
-             retSignal = Signal(bitStream,signalToBeDecoded.fs/obj.codeLength);
+             %while ~isempty(signalValues)
+             %    currentSequence = signalValues(1:obj.codeLength);
+             %    bitStream = obj.addBitToBitStream(bitStream, currentSequence,walshSequence);
+             %    signalValues = signalValues(obj.codeLength+1:end);
+             %end
+             
+
+             retSignal = Signal(rds,signalToBeDecoded.fs/obj.codeLength);
              retSignal.signaltype = Signaltype.Valuecontinuous;
              
              

@@ -1,10 +1,12 @@
 classdef PAMDemapper
     properties
         codeLength %length of the code is minimum and maximum
+        symbol_Vector
     end
     methods
         function obj = PAMDemapper(codeLength)
             obj.codeLength=codeLength;
+            obj.symbol_Vector = obj.createSymbolVector;
         end
         
         function retSignal = step(obj, signal)
@@ -17,8 +19,7 @@ classdef PAMDemapper
         end
         
         function nearestSymbol = findNearestSymbol(obj,value)
-            symbolVector = obj.createSymbolVector();
-            distanceVector = abs(symbolVector-value);
+            distanceVector = abs(obj.symbol_Vector-value);
             minIndex = find(distanceVector == min(distanceVector));
             nearestSymbol = minIndex-(obj.codeLength +1); %From index one can easily map down to real value
             

@@ -31,7 +31,7 @@ classdef AdvancedImageSerializer < handle
                obj.img = ind2rgb(obj.x,obj.img);
             end
             
-            obj.max_cols = size(obj.img,1);
+            obj.max_cols = size(obj.img,2);
             
             if colorResolutionInBits == 4
                 obj.img = obj.downscaleImageTo4Bits();

@@ -4,19 +4,26 @@ classdef ImageDeserializer
     
     properties
         img
+        colorResolution
     end
     
     methods
-        function obj = ImageDeserializer()
+        function obj = ImageDeserializer(colorResolution)
+            obj.colorResolution=colorResolution;
             
         end
         
         function image = GetImageFromBitVector(obj, bitStreamVector, size_x, size_y)
-            %[size_x,size_y, imgBits] = obj.extractLengthInfromation(bitStreamVector);
             %transform vector back to matrix
             for n = 1:3
-                BitMatrix=reshape(bitStreamVector(n,:),[],8);
+                BitMatrix=reshape(bitStreamVector(n,:),[],obj.colorResolution);
                 DecMatrix = bi2de(BitMatrix);
+                size(DecMatrix)
+                if obj.colorResolution == 4
+                    DecMatrix = obj.upscaleImageTo8Bits(DecMatrix);
+                end
+                size(DecMatrix)
+     
                 ColorMat = reshape(DecMatrix,size_x,size_y);
                 obj.img(:,:,n) = ColorMat(:,:);
             end
@@ -27,12 +34,9 @@ classdef ImageDeserializer
             image = obj.img;
         end
         
-        function [size_x,size_y, imgBits] = extractLengthInfromation(obj,inputBitStreamVector)
-            lengt_bi = inputBitStreamVector(1,[end-31:end]);
-            size_x = bi2de(lengt_bi);
-            size_y = (length(inputBitStreamVector(1,[1:end-32]))/8)/size_x;
-            imgBits = inputBitStreamVector([1:3],[1:end-32]);
-        end
+         function  upscaledArray = upscaleImageTo8Bits(obj, array)
+            upscaledArray = array * 17;
+         end
     end
 end
 

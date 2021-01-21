@@ -13,8 +13,8 @@ scope = Scope();
 done = false;
  
  %% Serialize Image
-serializer = AdvancedImageSerializer('TestImages\tvTestScreen.jpg', 4);
-deserializer = AdvancedImageDeserializer(4,false);
+serializer = AdvancedImageSerializer('TestImages/tvTestScreen.jpg', 4);
+deserializer = AdvancedImageDeserializer(4,true);
 
 while done == false
 

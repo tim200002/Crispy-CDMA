@@ -25,7 +25,7 @@ classdef ImageSerializer
             %METHOD1 Summary of this method goes here
             %   Detailed explanation goes here
             
-            [sizex, sizey] = size(obj.rgb);
+            %[sizex, sizey] = size(obj.rgb);
             for n = 1:3
                 colorMat = obj.rgb(:,:,n);
                 colorVector = reshape(colorMat,1,[]);
@@ -38,12 +38,12 @@ classdef ImageSerializer
             %   Detailed explanation goes here
             
             ByteStream = obj.GenerateRGBByteStream();
-            [sizex, sizey] = size(obj.rgb);
+            %[sizex, sizey] = size(obj.rgb);
              for n = 1:3
                 BitSignal = de2bi(ByteStream(n,:),8);
                 BitSignalVector = reshape(BitSignal,1,[]);
-                BitSignalVectorWithLength = [BitSignalVector,de2bi(sizex,32)];
-                BitStream(n,:) = BitSignalVectorWithLength(1,:);
+                %BitSignalVectorWithLength = [BitSignalVector,de2bi(sizex,32)];
+                BitStream(n,:) = BitSignalVector(1,:);
             end            
         end
     end

@@ -11,11 +11,11 @@ classdef ImageDeserializer
             
         end
         
-        function image = GetImageFromBitVector(obj, bitStreamVector)
-            [size_x,size_y, imgBits] = obj.extractLengthInfromation(bitStreamVector);
+        function image = GetImageFromBitVector(obj, bitStreamVector, size_x, size_y)
+            %[size_x,size_y, imgBits] = obj.extractLengthInfromation(bitStreamVector);
             %transform vector back to matrix
             for n = 1:3
-                BitMatrix=reshape(imgBits(n,:),[],8);
+                BitMatrix=reshape(bitStreamVector(n,:),[],8);
                 DecMatrix = bi2de(BitMatrix);
                 ColorMat = reshape(DecMatrix,size_x,size_y);
                 obj.img(:,:,n) = ColorMat(:,:);

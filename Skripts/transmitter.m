@@ -11,7 +11,7 @@ audioDeviceId=6;
 
  
  %% Serialize Image
-serializer = ImageSerializer('TestImages/tvTestScreen32x32.jpg');
+serializer = ImageSerializer('TestImages/tvTestScreen32x32.jpg',4);
 bitStream=serializer.GenerateRGBBitStream();
 cdmaEncoder = CDMAEncoder(codeLength);
 signal_length = 1000;

@@ -69,6 +69,6 @@ resStream(1,:)=res1.data';
 resStream(2,:)=res2.data';
 resStream(3,:)=res3.data';
 
-deserializer = ImageDeserializer();
+deserializer = ImageDeserializer(4);
 img=deserializer.GetImageFromBitVector(resStream,32,32);
 

@@ -11,8 +11,8 @@ dbScope = Scope(ScopeYAxis.dB);
 scope = Scope();
 
  %% Serialize Image
-serializer = ImageSerializer('TestImages/tvTestScreen32x32.jpg');
-deserializer = ImageDeserializer();
+serializer = ImageSerializer('TestImages/tvTestScreen32x32.jpg',4);
+deserializer = ImageDeserializer(4);
 
 
 signal = serializer.GenerateRGBBitStream();
@@ -47,8 +47,8 @@ headerSignal = header.addHeader(afterMapper);
  mixedSignal = mixer.step(pulseShapedSignal);
  pilotedSignal = pilotInserter.step(mixedSignal);
  modulatedSignal = Signal(pilotedSignal.data/4,pilotedSignal.fs);
- figure(1)
- amplitudeScope.plotFrequencyDomain(modulatedSignal);
+%  figure(1)
+%  amplitudeScope.plotFrequencyDomain(modulatedSignal);
 
 
  %% Channel
@@ -104,5 +104,4 @@ resStream(2,:)=res2.data';
 resStream(3,:)=res3.data';
 
 img = deserializer.GetImageFromBitVector(resStream,32,32);
-figure(2)
-imshow(img);
+

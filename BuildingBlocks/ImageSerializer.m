@@ -6,10 +6,12 @@ classdef ImageSerializer
         img
         x
         rgb
+        colorResolution
     end
     
     methods
-        function obj = ImageSerializer(pathToImage)
+        function obj = ImageSerializer(pathToImage, colorResolution)
+            obj.colorResolution=colorResolution;
             %IMAGESERIALIZER Construct an instance of this class
             %   Detailed explanation goes here
             [obj.x,obj.img] = imread(pathToImage);
@@ -18,6 +20,10 @@ classdef ImageSerializer
                obj.rgb = obj.x;
             else
                obj.rgb = ind2rgb(obj.x,obj.img);
+            end
+            
+            if colorResolution == 4
+                obj.rgb = obj.downscaleImageTo4Bits();
             end
         end
         
@@ -40,11 +46,14 @@ classdef ImageSerializer
             ByteStream = obj.GenerateRGBByteStream();
             %[sizex, sizey] = size(obj.rgb);
              for n = 1:3
-                BitSignal = de2bi(ByteStream(n,:),8);
+                BitSignal = de2bi(ByteStream(n,:),obj.colorResolution);
                 BitSignalVector = reshape(BitSignal,1,[]);
                 %BitSignalVectorWithLength = [BitSignalVector,de2bi(sizex,32)];
                 BitStream(n,:) = BitSignalVector(1,:);
             end            
+        end
+         function  downscaledImage = downscaleImageTo4Bits(obj)
+            downscaledImage = obj.rgb / 17;
         end
     end
 end

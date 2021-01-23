@@ -9,6 +9,7 @@ symbolRate = 0.8e3;
 amplitudeScope = Scope(ScopeYAxis.Magnitude);
 dbScope = Scope(ScopeYAxis.dB);
 scope = Scope();
+analyzer = Analyzer();
 
  %% Serialize Image
 serializer = ImageSerializer('TestImages/tvTestScreen32x32.jpg',4);
@@ -31,7 +32,8 @@ cdmaSignal3 = cdmaEncoder.step(bitSignal3,3);
 addedSignal =cdmaSignal1+cdmaSignal2+cdmaSignal3;
 
 pamMapper = PAMMapper(codeLength);
-afterMapper = pamMapper.step(addedSignal);
+afterMapper = pamMapper.stepForExactly3Signals(addedSignal);
+
 
 %% Add Header
 header = Header(headerLength);
@@ -52,7 +54,7 @@ headerSignal = header.addHeader(afterMapper);
 
 
  %% Channel
-channel = Channel('awgn', 30);
+channel = Channel('awgn', -10);
 
 afterChannel = channel.step(modulatedSignal);
 
@@ -86,16 +88,18 @@ demodulatedSignal = timediscreteSignal;
 header = Header(headerLength);
 [signalWithoutHeader, length] = header.removeHeaderAndGetLength(demodulatedSignal);
 
-
+analyzer.plotConstellation(signalWithoutHeader, [-0.75,-0.25,0.25,0.75]);
 %% CDMA Decode Signal
 pamDemapper = PAMDemapper(codeLength);
-demappedSignal = pamDemapper.step(signalWithoutHeader);
+demappedSignal = pamDemapper.stepForExactly3Signals(signalWithoutHeader);
 
 cdmaDecoder = CDMADecoder(codeLength);
 
 
 %% Convert Back to Image
 res1 = cdmaDecoder.step(demappedSignal,1);
+[bitErrorRate, numberOfErrors] = analyzer.calculateBitErrorRate(bitSignal1, res1)
+analyzer.plotBitErrorRateOverTime(bitSignal1, res1, 100);
 res2 = cdmaDecoder.step(demappedSignal,2);
 res3 = cdmaDecoder.step(demappedSignal,3);
 
@@ -103,5 +107,6 @@ resStream(1,:)=res1.data';
 resStream(2,:)=res2.data';
 resStream(3,:)=res3.data';
 
+figure(2)
 img = deserializer.GetImageFromBitVector(resStream,32,32);
 

@@ -18,11 +18,9 @@ classdef ImageDeserializer
             for n = 1:3
                 BitMatrix=reshape(bitStreamVector(n,:),[],obj.colorResolution);
                 DecMatrix = bi2de(BitMatrix);
-                size(DecMatrix)
                 if obj.colorResolution == 4
                     DecMatrix = obj.upscaleImageTo8Bits(DecMatrix);
                 end
-                size(DecMatrix)
      
                 ColorMat = reshape(DecMatrix,size_x,size_y);
                 obj.img(:,:,n) = ColorMat(:,:);

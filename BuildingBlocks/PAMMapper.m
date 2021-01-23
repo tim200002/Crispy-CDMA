@@ -16,6 +16,16 @@ classdef PAMMapper
             retSignal= Signal(data, signal.fs);
             retSignal.signaltype = Signaltype.Valuecontinuous;
         end
+        
+        function retSignal = stepForExactly3Signals(obj, signal)
+            map =containers.Map([-3,-1,1,3],[-0.75,-0.25,0.25,0.75]);
+            data = [];
+            for i=1:signal.length
+                data = [data, map(signal.data(i))];
+            end
+            retSignal= Signal(data, signal.fs);
+            retSignal.signaltype = Signaltype.Valuecontinuous;
+        end
         function symbolVector = createSymbolVector(obj)
             symbolVector=[];
             delta = 2/(2*obj.codeLength+1);

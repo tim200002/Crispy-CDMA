@@ -23,11 +23,11 @@ scope = Scope();
 done = false;
 
  %% Serialize Image
-serializer = AdvancedImageSerializer('TestImages/tvTestScreen32x32.jpg', 4);
+serializer = AdvancedImageSerializer('TestImages/tvTestScreen.jpg', 4);
+deserializer = AdvancedImageDeserializer(4,true);
 
 while 1
 tic;
-disp('new one')
 
 
 
@@ -50,12 +50,12 @@ cdmaSignal3 = cdmaEncoder.step(bitSignal3,3);
 addedSignal =cdmaSignal1+cdmaSignal2+cdmaSignal3;
 
 pamMapper = PAMMapper(codeLength);
-afterMapper = pamMapper.step(addedSignal);
+afterMapper = pamMapper.stepForExactly3Signals(addedSignal);
 
 %% Add Header
 header = Header(headerLength);
 
-headerSignal = header.addHeader(afterMapper);
+headerSignal = header.addHeader(afterMapper)
 
 %% Modulation
  pilotInserter = PilotInserter(fc);
@@ -65,14 +65,14 @@ headerSignal = header.addHeader(afterMapper);
  pulseShapedSignal = pulseShaper.step(headerSignal);
  mixedSignal = mixer.step(pulseShapedSignal);
  pilotedSignal = pilotInserter.step(mixedSignal);
- modulatedSignal = Signal(pilotedSignal.data, pilotedSignal.fs);
+ modulatedSignal = Signal(pilotedSignal.data/3, pilotedSignal.fs)
 
  %% Transmit Signal
  sink = Sink(audioDeviceId, 48e3, '16-bit integer');
- sink.step(modulatedSignal);
+ sink.step(modulatedSignal)
  
  while toc<delay 
-
-    pause(0.001);
+    disp('wait')
+    pause(1);
  end
 end

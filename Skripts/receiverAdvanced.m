@@ -3,11 +3,9 @@ profile on
 codeLength =4;
 headerLength = 16;
 fc = 13e3;
-samplesPerSymbol=15;
-symbolRate = 0.8e3;
 
-lastTime = now - 15*1000;
-delay = 15;
+
+delay = 10;
 
 
 %Must result in fs = 48e3
@@ -24,26 +22,23 @@ scope = Scope();
 done = false;
 
  %% Serialize Image
-serializer = AdvancedImageSerializer('TestImages/tvTestScreen.jpg', 4);
 deserializer = AdvancedImageDeserializer(4,true);
 
 while 1
-%Only Send every 15 seconds
+tic;
+disp('New one');
 
-while now < lastTime + delay*1000 
-    pause(1);
-end
-
-lastTime = now;
 
  %% Receive Signal
  source = Source(Sourcetype.Audiodevice,audioDeviceId,48000,'16-bit integer',16384);
- receivedSignal = source.step(20*48e3);
+ receivedSignal = source.step(6*48e3);
 
 
 
 %% Demdoulation
-signalToBeDemodulated = Signal(receivedSignal.data*2, receivedSignal.fs);
+signalToBeDemodulated = Signal(receivedSignal.data, receivedSignal.fs);
+figure(1)
+scope.plotTimeDomain(signalToBeDemodulated);
 
 mixer = Mixer(Mixertype.Cosine, fc);
 synchronizer = Synchronizer(fc);
@@ -51,8 +46,9 @@ synchronizer = Synchronizer(fc);
 
 
 %Remove Pilot
-[pilotIndex, significant] = synchronizer.step(signalToBeDemodulated)
+[pilotIndex, significant] = synchronizer.step(signalToBeDemodulated);
 if ~significant
+    disp('insignificant abort');
     break
 end
 removedPilot = Signal(signalToBeDemodulated.data(pilotIndex:end), signalToBeDemodulated.fs);
@@ -85,7 +81,7 @@ shortendSignal = Signal(signalWithoutHeader.data(1:length), signalWithoutHeader.
 
 %% CDMA Decode Signal
 pamDemapper = PAMDemapper(codeLength);
-demappedSignal = pamDemapper.stepForExactly3Signals(shortendSignal);
+demappedSignal = pamDemapper.step(shortendSignal);
 
 cdmaDecoder = CDMADecoder(codeLength);
 
@@ -99,8 +95,13 @@ resStream(1,:)=res1.data';
 resStream(2,:)=res2.data';
 resStream(3,:)=res3.data';
 
-
+figure(2)
 deserializer.AddIncomingSignal(resStream);
 
+while toc<delay 
+    pause(0.001);
 end
+
+end
+fi
 imshow(deserializer.img);

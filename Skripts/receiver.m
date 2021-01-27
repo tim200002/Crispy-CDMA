@@ -1,23 +1,25 @@
 clear all
 codeLength =4;
-headerLength = 16;
+headerLength = 20;
 fc = 13e3;
 samplesPerSymbol=15;
 audioDeviceId=6;
 
 magnitudeScope = Scope(ScopeYAxis.Magnitude);
+scope = Scope();
 
 
  
  %% Receive Signal
  source = Source(Sourcetype.Audiodevice,audioDeviceId,48000,'16-bit integer',16384);
- receivedSignal = source.step(20*48e3);
+ receivedSignal = source.step(30*48e3);
+    scope.plotTimeDomain(receivedSignal);
 
 
 
 %% Demdoulation
-signalToBeDemodulated = Signal(receivedSignal.data*2, receivedSignal.fs);
-
+signalToBeDemodulated = Signal(receivedSignal.data, receivedSignal.fs);
+scope.plotTimeDomain(signalToBeDemodulated);
 mixer = Mixer(Mixertype.Cosine, fc);
 synchronizer = Synchronizer(fc);
 
@@ -69,6 +71,17 @@ resStream(1,:)=res1.data';
 resStream(2,:)=res2.data';
 resStream(3,:)=res3.data';
 
+figure(2)
 deserializer = ImageDeserializer(4);
 img=deserializer.GetImageFromBitVector(resStream,32,32);
+
+%% Compare
+compare = true;
+if compare
+load('Variables/bitSignal1.mat');
+load('Variables/bitSignal2.mat');
+load('Variables/bitSignal3.mat');
+analyzer = Analyzer();
+analyzer.plotBitErrorRateOverTime(res1,bitSignal1,100);
+end
 

@@ -1,6 +1,6 @@
 clear all
 codeLength =4;
-headerLength = 16;
+headerLength = 20;
 fc = 13e3;
 
 %Must result in fs = 48e3

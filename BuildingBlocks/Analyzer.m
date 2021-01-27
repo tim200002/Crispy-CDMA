@@ -31,16 +31,16 @@ classdef Analyzer
             bitRatesPerIntervall = sum(abs(shapedRef-shapedRec))/intervallLength;
             
             bitRatesPerIntervall = [bitRatesPerIntervall sum(abs(endRef-endRec))/length(endRef)];
-            
-            plot(bitRatesPerIntervall);
+            xValues = 0:intervallLength:intervallLength*(length(bitRatesPerIntervall)-1);
+            plot(xValues,bitRatesPerIntervall);
             ylabel(sprintf('BER for intervalls of size %d', intervallLength));
-            xlabel('Interval Index');
+            xlabel('Index');
         end
         
         function [largeArray, rest] = splitIntoArraysToReshape(obj, signal, intervallLength)
              signalData = signal.data;
             numberOfNotMatchingElements = mod(length(signalData), intervallLength);
-            endArray = signalData(end-numberOfNotMatchingElements,end);
+            endArray = signalData(end-numberOfNotMatchingElements:end);
             signalData = signalData(1:end-numberOfNotMatchingElements);
             largeArray= signalData;
             rest = endArray;

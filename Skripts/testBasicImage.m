@@ -91,7 +91,7 @@ header = Header(headerLength);
 analyzer.plotConstellation(signalWithoutHeader, [-0.75,-0.25,0.25,0.75]);
 %% CDMA Decode Signal
 pamDemapper = PAMDemapper(codeLength);
-demappedSignal = pamDemapper.stepForExactly3Signals(signalWithoutHeader);
+demappedSignal = pamDemapper.stepForExactly3Signals(signalWithoutHeader)
 
 cdmaDecoder = CDMADecoder(codeLength);
 
